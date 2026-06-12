@@ -58,10 +58,13 @@ Pick every class that applies:
 
 ### Step 2 — machine checks (decision-capping)
 
-From the skill directory:
+Resolve the script against this skill's own directory (it does not depend on
+the current working directory):
 
 ```bash
-python3 scripts/check_overclaims.py <changed .md files...>
+python3 "<skill-dir>/scripts/check_overclaims.py" <changed .md files...>
+# In a Claude Code plugin this is "${CLAUDE_PLUGIN_ROOT}/skills/aegis-boundary/scripts/check_overclaims.py";
+# when run from the skill directory itself, "scripts/check_overclaims.py" also works.
 ```
 
 Scans for the three known overclaim families defined in

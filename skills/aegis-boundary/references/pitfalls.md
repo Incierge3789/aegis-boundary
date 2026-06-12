@@ -45,10 +45,10 @@ from this file alone.
    with the qualification in the same sentence (§5-B).
 
 10. **The three forbidden claim families.** No deletion claims past the
-    provider boundary (C-3 forbidden), no absolute no-leak claims (C-1
-    forbidden), and no blanket "RAG is automatically safe" claims (C-2 forbidden).
-    The machine check enforces the English families; argue with the reframe,
-    not the lint (§5-A).
+    provider boundary (C-3), no absolute no-leak claims (C-1), and no blanket
+    all-RAG-is-handled claims (C-2). The exact forbidden strings and their
+    honest reframes live in the canon §5-A table; the machine check enforces
+    the English forms. Argue with the reframe, not the lint.
 
 11. **Substrate ≠ outcome, in one sentence.** "The mechanism can X" and
     "customers have proven X in production" must be separated explicitly
