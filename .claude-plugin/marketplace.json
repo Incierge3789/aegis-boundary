@@ -1,0 +1,18 @@
+{
+  "name": "aegis-skills",
+  "owner": {
+    "name": "Incierge / Aegis",
+    "email": "info@incierge.jp"
+  },
+  "description": "Official Aegis skills for AI coding agents — boundary review, claim parity, and trust-boundary hygiene.",
+  "plugins": [
+    {
+      "name": "aegis-boundary",
+      "source": "./",
+      "description": "Advisory boundary review for AI-agent work around Aegis: what agents see, do, output, and claim. READY / REVIEW / STOPPED with machine-check evidence.",
+      "category": "verification",
+      "tags": ["aegis", "trust-boundary", "claim-parity", "review"],
+      "homepage": "https://aegisagentcontrol.com"
+    }
+  ]
+}
