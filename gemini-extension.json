@@ -1,5 +1,8 @@
 {
   "name": "aegis-boundary",
-  "version": "0.1.0",
-  "contextFileName": "GEMINI.md"
+  "version": "0.1.1",
+  "description": "Advisory boundary review for AI-agent work around Aegis: what agents see, do, output, and claim.",
+  "contextFileName": "GEMINI.md",
+  "repository": "https://github.com/Incierge3789/aegis-boundary",
+  "homepage": "https://aegisagentcontrol.com"
 }

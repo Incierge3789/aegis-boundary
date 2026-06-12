@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 # C-1 absolute-leak. Bounded gap (not bare adjacency) so intervening hedge
@@ -72,10 +73,19 @@ DEFINITIONAL = re.compile(
 DEFINITION_PREFIX = re.compile(r"^\s*(>|#{1,6}\s|//|#\s)")
 
 
+def _fold(s: str) -> str:
+    """Fold confusable Unicode to ASCII so homoglyph/diacritic spellings cannot
+    slip the English regexes (e.g. fullwidth or accented look-alikes)."""
+    decomposed = unicodedata.normalize("NFKD", s)
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
+
+
 def _is_exempt(line: str) -> bool:
-    stripped = line.lstrip()
-    if stripped.startswith("|"):
-        return True  # markdown table row (the canon's never-claim table)
+    # A table row is exempt only if it also cites a family id or a rule keyword,
+    # so marketing prose cannot hide in a table structure. The canon's
+    # never-claim rows all carry a C-N id, so this keeps them exempt.
+    if line.lstrip().startswith("|") and (FAMILY_ID.search(line) or DEFINITIONAL.search(line)):
+        return True
     if DEFINITION_PREFIX.match(line) and (FAMILY_ID.search(line) or DEFINITIONAL.search(line)):
         return True  # heading/quote/comment line clearly defining the rule
     return False
@@ -95,26 +105,38 @@ def _decode(path: Path) -> str:
     return text.replace("\x00", "")
 
 
+def _c3_near(text: str, window: int = 80) -> bool:
+    """C-3 fires only when a delete verb and a provider noun are within `window`
+    chars of each other — co-occurrence anywhere on a long line is not enough
+    (e.g. 'delete local cache; we never send to the provider' is not C-3)."""
+    for m in PAT_CAN_DELETE.finditer(text):
+        if PROVIDER_CONTEXT.search(text[max(0, m.start() - window): m.end() + window]):
+            return True
+    return False
+
+
 def scan_file(path: Path) -> list[tuple[object, str, str]]:
     hits: list[tuple[object, str, str]] = []
     text = _decode(path)
     lines = text.splitlines()
 
     # Pass 1: per-line (gives line numbers + applies the structural exemption).
-    for n, line in enumerate(lines, 1):
-        if _is_exempt(line):
+    # Each line is ASCII-folded before matching to defeat homoglyph spellings.
+    for n, raw in enumerate(lines, 1):
+        if _is_exempt(raw):
             continue
+        line = _fold(raw)
         if PAT_ABSOLUTE_LEAK.search(line):
-            hits.append((n, "C-1 absolute-leak", line.strip()))
+            hits.append((n, "C-1 absolute-leak", raw.strip()))
         if PAT_RAG_AUTO_SAFE.search(line):
-            hits.append((n, "C-2 RAG-auto-safe", line.strip()))
-        if PAT_CAN_DELETE.search(line) and PROVIDER_CONTEXT.search(line):
-            hits.append((n, "C-3 provider-side-delete", line.strip()))
+            hits.append((n, "C-2 RAG-auto-safe", raw.strip()))
+        if PAT_CAN_DELETE.search(line) and _c3_near(line):
+            hits.append((n, "C-3 provider-side-delete", raw.strip()))
 
     # Pass 2: whole-file, over NON-exempt lines only, whitespace-normalized.
     # Catches phrasings split across line breaks that pass 1 cannot see, while
     # preserving the exemption allowlist (exempt lines are dropped first).
-    joined = re.sub(r"\s+", " ", " ".join(l for l in lines if not _is_exempt(l)))
+    joined = _fold(re.sub(r"\s+", " ", " ".join(l for l in lines if not _is_exempt(l))))
     already = {fam for _, fam, _ in hits}
     for pat, fam in (
         (PAT_ABSOLUTE_LEAK, "C-1 absolute-leak"),
@@ -122,25 +144,27 @@ def scan_file(path: Path) -> list[tuple[object, str, str]]:
     ):
         if fam not in already and pat.search(joined):
             hits.append(("multi-line", fam, "(phrase split across lines)"))
-    if "C-3 provider-side-delete" not in already and (
-        PAT_CAN_DELETE.search(joined) and PROVIDER_CONTEXT.search(joined)
-    ):
-        # require proximity in the joined text to avoid unrelated co-occurrence
-        for m in PAT_CAN_DELETE.finditer(joined):
-            window = joined[max(0, m.start() - 80): m.end() + 80]
-            if PROVIDER_CONTEXT.search(window):
-                hits.append(("multi-line", "C-3 provider-side-delete", "(phrase split across lines)"))
-                break
+    if "C-3 provider-side-delete" not in already and _c3_near(joined):
+        hits.append(("multi-line", "C-3 provider-side-delete", "(phrase split across lines)"))
     return hits
 
 
 def main(argv: list[str]) -> int:
-    if not argv:
-        print("usage: check_overclaims.py <file.md> [more files...]", file=sys.stderr)
+    # --quiet suppresses the matched line snippet so log-captured runs never
+    # echo file content (still prints file:line and family).
+    quiet = False
+    files = []
+    for a in argv:
+        if a in ("--quiet", "-q"):
+            quiet = True
+        else:
+            files.append(a)
+    if not files:
+        print("usage: check_overclaims.py [--quiet] <file.md> [more files...]", file=sys.stderr)
         return 1
     rc = 0
     scanned = 0
-    for arg in argv:
+    for arg in files:
         path = Path(arg).expanduser()
         if not path.is_file():
             print(f"[FAIL] input not found (missing files are a FAIL, not a skip): {arg}")
@@ -148,7 +172,10 @@ def main(argv: list[str]) -> int:
             continue
         scanned += 1
         for n, family, text in scan_file(path):
-            print(f"[FAIL] {path}:{n} [{family}]\n    > {text[:200]}")
+            if quiet:
+                print(f"[FAIL] {path}:{n} [{family}]")
+            else:
+                print(f"[FAIL] {path}:{n} [{family}]\n    > {text[:200]}")
             rc = 1
     if rc == 0:
         print(f"[OK] {scanned} file(s) scanned, 0 overclaim violations.")

@@ -41,6 +41,17 @@ This skill does **not** replace the aegis-trust SDK or Aegis Core.
 - Product, roadmap, pricing, and publication decisions require human approval.
   This skill can only return REVIEW / STOPPED and route there.
 
+## Routing — what this skill does NOT do
+
+Stay scoped to boundary review. Route other needs to the right place:
+
+- Release / ship-readiness scoring → your team's release process and readiness
+  checks, not this skill.
+- Adversarial fact-verification of a specific strong claim → a dedicated
+  claim-verification step.
+- A production access decision ("may this agent read X now?") → that is SDK /
+  Core runtime territory, out of scope here.
+
 ## Review procedure
 
 ### Step 1 — classify the surface under review

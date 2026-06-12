@@ -31,6 +31,11 @@ Machine checks: overclaim_scan PASS|FAIL
 Why / Allowed (advisory) / Blocked (advisory) / Required checks / Next
 ```
 
+## Requirements
+
+The overclaim scan (`scripts/check_overclaims.py`) needs **Python 3.7+**. The
+skill instructions themselves are plain markdown and need no runtime.
+
 ## Install
 
 **Claude Code** (plugin marketplace):

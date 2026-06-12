@@ -1,6 +1,9 @@
 {
   "name": "aegis-boundary",
   "description": "Advisory boundary review for AI-agent work around Aegis: what agents see, do, output, and claim. Returns READY / REVIEW / STOPPED with machine-check evidence. Does not authorize or enforce.",
-  "version": "0.1.0",
-  "author": "Incierge / Aegis"
+  "version": "0.1.1",
+  "author": "Incierge / Aegis",
+  "license": "MIT",
+  "homepage": "https://aegisagentcontrol.com",
+  "repository": "https://github.com/Incierge3789/aegis-boundary"
 }
