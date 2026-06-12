@@ -12,6 +12,7 @@
       "description": "Advisory boundary review for AI-agent work around Aegis: what agents see, do, output, and claim. READY / REVIEW / STOPPED with machine-check evidence.",
       "category": "verification",
       "tags": ["aegis", "trust-boundary", "claim-parity", "review"],
+      "license": "MIT",
       "homepage": "https://aegisagentcontrol.com"
     }
   ]

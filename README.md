@@ -78,5 +78,9 @@ own machine checks.
 
 ## License
 
-Not yet declared. License selection (MIT proposed) is a legal-panel decision
-gated before the public flip — see `docs/DISTRIBUTION.md` checklist item 8.
+MIT — see `LICENSE`. Copyright (c) 2026 Aegis Project (Incierge).
+
+The MIT license covers the code and text of this repository. It does not
+grant rights to the "Aegis" name or logos, or the right to represent forks as
+official Aegis distributions. The official distribution of this skill is
+`github.com/Incierge3789/aegis-boundary`.

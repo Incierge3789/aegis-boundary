@@ -1,13 +1,11 @@
 # Changelog
 
-## 0.1.0 — 2026-06-12 (private prep, unreleased)
+## 0.1.0 — 2026-06-12
 
-- Initial packaging of the aegis-boundary advisory skill for four agent CLIs
-  from one shared `skills/` directory: Claude Code (marketplace + plugin),
-  Codex (agent skills), Gemini CLI (extension), Cursor (plugin).
-- Standalone overclaim scan (`check_overclaims.py`, three families ported
-  from the upstream Aegis honesty lint).
-- Vendored boundary canon + pitfalls (parity-tracked, see docs/PARITY.md).
-- Distribution status and publish gates: docs/DISTRIBUTION.md.
-- Repo is private; public flip and marketplace submissions are gated on
-  explicit publish GO.
+- Initial release of the aegis-boundary advisory skill, packaged for four
+  agent CLIs from one shared `skills/` directory: Claude Code (marketplace +
+  plugin), Codex (agent skills), Gemini CLI (extension), Cursor (plugin).
+- Standalone overclaim scan (`check_overclaims.py`, three claim families
+  ported from the upstream Aegis honesty lint).
+- Vendored boundary canon + pitfalls, parity-tracked (`docs/PARITY.md`).
+- License: MIT, Copyright (c) 2026 Aegis Project (Incierge).
