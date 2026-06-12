@@ -1,0 +1,5 @@
+# Aegis publish manifest (confidential firewall, AO-002/AO-008)
+# This repo is an approved public distribution. Confidential red line:
+# nothing in this repo may reference internal docs/paths/people beyond the
+# intended-public facts listed in docs/PARITY.md.
+confidential_globs: []
