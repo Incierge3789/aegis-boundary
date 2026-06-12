@@ -44,20 +44,37 @@ PROVIDER_CONTEXT = re.compile(
     r"LLM|RAG|provider|prompt|embedding|vector|model|training|external|send",
     re.IGNORECASE,
 )
-# Lines that quote a forbidden phrase in order to refute or forbid it are not
-# violations (mirrors the upstream lint's refutation allowlist, simplified).
-REFUTATION_MARKER = re.compile(
-    r"forbidden|never-claim|never\s+write|do\s+not\s+say|do\s+not\s+write|reframe|"
-    r"overclaim|anti-?pattern|not\s+claimable|violation|incorrect|"
-    r"phrases\s+like|family|example\s+of|honest\s+replacement|\bC-[123]\b",
-    re.IGNORECASE,
-)
+# A line that quotes a forbidden phrase to define or refute it is exempt — but
+# exemption is granted by STRUCTURE, not by the mere presence of a refutation
+# word. Letting any line that contains "forbidden" self-exempt lets an attacker
+# smuggle a real overclaim past the scan ("It is not forbidden to say: ...").
+# So a line is exempt only if it is one of these structural forms:
+#   - a markdown table row (the canon's never-claim table)         -> starts with "|"
+#   - a blockquote / heading / comment line                        -> starts with > # // #
+#   - a list/prose line that cites a family id (C-1/C-2/C-3)        -> the canon & pitfalls
+# Marketing prose has none of these, so it cannot self-exempt.
+FAMILY_ID = re.compile(r"\bC-[123]\b")
+STRUCTURAL_PREFIX = re.compile(r"^\s*(\||>|#{1,6}\s|//|#\s|\*\s|-\s)")
+
+
+def _is_exempt(line: str) -> bool:
+    stripped = line.lstrip()
+    if stripped.startswith("|"):
+        return True  # markdown table row (never-claim definition table)
+    if FAMILY_ID.search(line):
+        return True  # explicitly tags the family being described
+    if STRUCTURAL_PREFIX.match(line) and re.search(
+        r"forbidden|never-?claim|reframe|anti-?pattern|overclaim|honest\s+(?:replacement|reframe)",
+        line, re.IGNORECASE,
+    ):
+        return True  # heading/quote/comment/list line that is clearly defining the rule
+    return False
 
 
 def scan_file(path: Path) -> list[tuple[int, str, str]]:
     hits: list[tuple[int, str, str]] = []
     for n, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
-        if REFUTATION_MARKER.search(line):
+        if _is_exempt(line):
             continue
         if PAT_ABSOLUTE_LEAK.search(line):
             hits.append((n, "C-1 absolute-leak", line.strip()))

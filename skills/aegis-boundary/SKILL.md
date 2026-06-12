@@ -64,8 +64,9 @@ From the skill directory:
 python3 scripts/check_overclaims.py <changed .md files...>
 ```
 
-Scans for the three known overclaim families (absolute-leak, RAG-auto-safe,
-provider-side-delete). **Exit codes cap this review's decision: any FAIL means
+Scans for the three known overclaim families defined in
+`references/boundary_canon.md` §5-A (C-1, C-2, C-3). **Exit codes cap this
+review's decision: any FAIL means
 the final decision can never be READY.** They cap nothing at runtime. Do not
 reinterpret, soften, or override a machine FAIL with narrative judgment.
 
